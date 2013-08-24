@@ -15,9 +15,7 @@ object RouteHandler extends Handler {
     val reply = response
     .right.flatMap {
       case (Some(from), Some(to)) => Right(OpenTripPlanner.plan(from, to))
-      case (None, Some(address)) => Left("Could not find "+address+". Try again with a different spelling.")
-      case (Some(address), None) => Left("Could not find "+address+". Try again with a different spelling.")
-      case _ => Left("Could not find either location. Try again with a different spelling.")
+      case _ => Left("Could not find a location. Try again with a different spelling.")
     }
     .right.flatMap {
       case Some(response) => Right(formatItinerary((response.json \ "plan" \ "itineraries")(0)))
