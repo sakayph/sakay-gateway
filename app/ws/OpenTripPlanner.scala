@@ -26,4 +26,22 @@ object OpenTripPlanner {
 
     Await.result(request, 20 seconds)
   }
+
+  def stopsNearPoint(point: LatLng) = allCatch opt {
+    val request = WS.url(API+"/transit/stopsNearPoint").withQueryString(
+      "lat" -> point.lat.toString,
+      "lon" -> point.lng.toString,
+      "extended" -> "true"
+    ).get()
+
+    Await.result(request, 20 seconds)
+  }
+  
+  def routeData(id: String) = allCatch opt {
+    val request = WS.url(API+"/transit/routeData").withQueryString(
+      "id" -> id
+    ).get()
+
+    Await.result(request, 20 seconds)
+  }
 }

@@ -23,4 +23,5 @@ object Handler {
   }
 
   register(RouteHandler)
+  register(NearHandler)
 }
