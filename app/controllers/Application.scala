@@ -7,6 +7,7 @@ import play.api.data._
 import play.api.data.Forms._
 
 import sms._
+import database.Messages
 
 object Application extends Controller {
 
@@ -22,7 +23,9 @@ object Application extends Controller {
     form.bindFromRequest.fold(
       errors => BadRequest("incomplete"),
       { request =>
+        val id = Messages.saveIncoming(request)
         val message = Handler.process(request)
+        Messages.saveOutgoing(message, id)
         Ok(message.body)
       }
     )
