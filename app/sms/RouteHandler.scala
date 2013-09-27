@@ -41,20 +41,22 @@ object RouteHandler extends Handler {
 
   def formatItinerary(itinerary: JsValue) = {
     val legs = (itinerary \ "legs").asInstanceOf[JsArray].value
-    legs.map(formatLeg).reduceLeft(_+"\n"+_)
+    legs.zipWithIndex.map(formatLeg).reduceLeft(_+"\n"+_)
   }
 
-  def formatLeg(leg: JsValue) = {
+  def formatLeg(tuple: (JsValue, Int)) = {
+    val (leg, index) = tuple
     val mode = leg.\("mode").as[String]
     val route = leg.\("route").as[String]
     val to = shortenAddress(leg.\("to").\("name").as[String])
 
-    if(mode == "WALK") {
-      "walk to "+to
+    val direction = if(mode == "WALK") {
+      "go to "+to
     }
     else {
       "ride "+route+" to "+to
     }
+    (index+1)+". "+direction
   }
 
   // hacky solution ATM
