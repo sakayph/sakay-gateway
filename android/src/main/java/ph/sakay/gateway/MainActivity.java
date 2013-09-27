@@ -1,42 +1,41 @@
 package ph.sakay.gateway;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.preference.Preference;
+import android.preference.PreferenceActivity;
 import android.view.View;
-import android.widget.Button;
 
-public class MainActivity extends Activity {
+public class MainActivity extends PreferenceActivity {
 
 	private IntentFilter mFilter;
 	private SmsReceiver mReceiver;
-	private Button mButton;
+	private Preference mButton;
 	private boolean mEnabled;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		addPreferencesFromResource(R.xml.main);
 		mFilter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
 		mFilter.setPriority(999);
 		mReceiver = new SmsReceiver();
 
-		mButton = new Button(this);
-		mButton.setText("Start");
-		mButton.setOnClickListener(new View.OnClickListener() {
+		mButton = findPreference("button");
+		mButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
 			@Override
-			public void onClick(View v) {
+			public boolean onPreferenceClick(Preference p) {
 				if(mEnabled) {
 					unregisterReceiver(mReceiver);
-					mButton.setText("Start");
+					mButton.setTitle("Start");
 				}
 				else {
 					registerReceiver(mReceiver, mFilter);
-					mButton.setText("Stop");
+					mButton.setTitle("Stop");
 				}
 				mEnabled = !mEnabled;
+				return true;
 			}
 		});
-
-		setContentView(mButton);
 	}
 }

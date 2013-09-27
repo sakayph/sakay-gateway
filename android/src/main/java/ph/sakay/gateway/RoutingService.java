@@ -3,8 +3,11 @@ package ph.sakay.gateway;
 import java.util.ArrayList;
 
 import android.app.IntentService;
+import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.telephony.SmsManager;
 import android.util.Log;
 
@@ -58,11 +61,17 @@ public class RoutingService extends IntentService {
 		return client;
 	}
 
+	private String getServerAddress() {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		return prefs.getString("server_url", "https://sms.sakay.ph");
+	}
+
 	private String request(String sender, String message) {
 		try {
 			Log.d("RoutingService", "Querying server");
 			HttpGet request = new HttpGet(
-				"http://192.168.1.121:9000/sms?target=null"+
+				getServerAddress()+
+				"/sms?target=null"+
 				"&body="+Uri.encode(message)+
 				"&source="+Uri.encode(sender)
 			);
