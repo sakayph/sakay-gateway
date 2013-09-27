@@ -61,9 +61,13 @@ object RouteHandler extends Handler {
   def shortenAddress(address: String) = {
     address
     .replace("Epifanio de los Santos Avenue", "EDSA")
+    .replace("Epifanio de los Santos Ave", "EDSA")
+    .replace("Epifanio de los Santos Av", "EDSA")
     .replace(" Intersection", "")
     .replace("Avenue", "Ave")
     .replace("Quezon City", "QC")
+    .replace("Makati City", "Makati")
+    .replace("Mandaluyong City", "Mandaluyong")
     .replace(", Manila", "")
   }
 }
