@@ -5,11 +5,6 @@ trait Handler {
   def process(message: SmsMessage): SmsMessage
 }
 
-object ErrorHandler extends Handler {
-  def keyword = "ERROR"
-  def process(message: SmsMessage) = message.reply("error")
-}
-
 object Handler {
   private var mapping = Map.empty[String, Handler]
 
@@ -19,7 +14,7 @@ object Handler {
 
   def process(message: SmsMessage): SmsMessage = {
     val keyword = message.body.takeWhile(_ != ' ').toUpperCase
-    mapping.get(keyword).getOrElse(ErrorHandler).process(message)
+    mapping.get(keyword).getOrElse(HelpHandler).process(message)
   }
 
   register(RouteHandler)
