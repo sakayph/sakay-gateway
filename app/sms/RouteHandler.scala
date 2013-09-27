@@ -41,7 +41,12 @@ object RouteHandler extends Handler {
 
   def formatItinerary(itinerary: JsValue) = {
     val legs = (itinerary \ "legs").asInstanceOf[JsArray].value
-    legs.zipWithIndex.map(formatLeg).reduceLeft(_+"\n"+_)
+    legs.zipWithIndex
+      .filter {
+        case (leg, 0) => true
+        case (leg, n) => leg.\("duration").as[Double] > 1000
+      }
+      .map(formatLeg).reduceLeft(_+"\n"+_)
   }
 
   def formatLeg(tuple: (JsValue, Int)) = {
