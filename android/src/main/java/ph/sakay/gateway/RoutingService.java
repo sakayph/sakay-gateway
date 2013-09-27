@@ -4,11 +4,13 @@ import java.util.ArrayList;
 
 import android.app.IntentService;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.telephony.SmsManager;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import org.apache.http.HttpResponse;
@@ -66,12 +68,19 @@ public class RoutingService extends IntentService {
 		return prefs.getString("server_url", "https://sms.sakay.ph");
 	}
 
+	private String getOwnNumber() {
+		TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+		String number = tm.getLine1Number();
+		if(number == null) number = "unknown";
+		return number;
+	}
+
 	private String request(String sender, String message) {
 		try {
 			Log.d("RoutingService", "Querying server");
 			HttpGet request = new HttpGet(
-				getServerAddress()+
-				"/sms?target=null"+
+				getServerAddress()+"/sms"+
+				"?target="+Uri.encode(getOwnNumber())+
 				"&body="+Uri.encode(message)+
 				"&source="+Uri.encode(sender)
 			);
