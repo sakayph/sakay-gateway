@@ -5,6 +5,8 @@
 
 GET     /sms                        controllers.Application.sms
 
+GET     /api/log                    controllers.Application.log
+
 GET     /api/list                   controllers.Application.list(since: Option[Long])
 
 # Map static resources from the /public folder to the /assets URL path

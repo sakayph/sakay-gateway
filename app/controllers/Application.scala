@@ -10,7 +10,8 @@ import play.api.data._
 import play.api.data.Forms._
 
 import sms._
-import database.Messages
+import models._
+import database.{Messages,Searches}
 
 object Application extends Controller with Secured {
 
@@ -36,6 +37,33 @@ object Application extends Controller with Secured {
         val message = Handler.process(request)
         Messages.saveOutgoing(message, id)
         Ok(message.body)
+      }
+    )
+  }
+
+  val logForm = Form(
+    mapping(
+      "fromName" -> text,
+      "fromLat" -> bigDecimal,
+      "fromLng" -> bigDecimal,
+      "toName" -> text,
+      "toLat" -> bigDecimal,
+      "toLng" -> bigDecimal
+    ) {
+      case (fromName, fromLat, fromLng, toName, toLat, toLng) =>
+        Search(fromName, Some(LatLng(fromLat.doubleValue, fromLng.doubleValue)), toName, Some(LatLng(toLat.doubleValue, toLng.doubleValue)))
+    }
+    {
+      case _ => None
+    }
+  )
+
+  def log = Action { implicit request =>
+    logForm.bindFromRequest.fold(
+      errors => BadRequest("incomplete"),
+      { request =>
+        Searches.save(request)
+        Ok("ok")
       }
     )
   }

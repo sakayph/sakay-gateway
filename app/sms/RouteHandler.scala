@@ -2,14 +2,25 @@ package sms
 
 import play.api.libs.json._
 import ws.{OpenTripPlanner,Google}
-import models.LatLng
+import models.{LatLng,Search}
+import database.Searches
 
 object RouteHandler extends Handler {
   def keyword = "ROUTE"
   def process(message: SmsMessage) = {
-    val response = parseMessage(message.body) match {
+    val parsedMessage = parseMessage(message.body)
+    val response = parsedMessage match {
       case None => Left("Incorrect format. Message should be ROUTE <start> TO <end>")
       case Some((from, to)) => Right((Google.geocode(from), Google.geocode(to)))
+    }
+
+    for {
+      address <- parsedMessage
+      latlng <- response.right.toOption
+    } {
+      val (fromName, toName) = address
+      val (fromLatLng, toLatLng) = latlng
+      Searches.save(Search(fromName, fromLatLng, toName, toLatLng))
     }
 
     val reply = response
