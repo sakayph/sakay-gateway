@@ -76,6 +76,7 @@ public class RoutingService extends IntentService {
 	}
 
 	private String request(String sender, String message) {
+		sender = Util.hash(Util.normalizeNumber(sender));
 		try {
 			Log.d("RoutingService", "Querying server");
 			HttpGet request = new HttpGet(
