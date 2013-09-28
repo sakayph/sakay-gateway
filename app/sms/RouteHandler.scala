@@ -44,7 +44,7 @@ object RouteHandler extends Handler {
     legs.zipWithIndex
       .filter {
         case (leg, 0) => true
-        case (leg, n) => leg.\("duration").as[Double] > 1000
+        case (leg, n) => leg.\("duration").as[Double] > 60000
       }
       .map(formatLeg).reduceLeft(_+"\n"+_)
   }
