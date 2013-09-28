@@ -30,7 +30,7 @@ object Application extends Controller with Secured {
     }
   )
 
-  def sms = Action { implicit request =>
+  def sms = SecureAction { implicit request =>
     form.bindFromRequest.fold(
       errors => BadRequest("incomplete"),
       { request =>
@@ -97,7 +97,7 @@ object Application extends Controller with Secured {
     )
   }
 
-  def poll = Action {
+  def poll = SecureAction {
     Ok(Json.toJson(Pending.list()))
   }
 

@@ -63,6 +63,11 @@ public class RoutingService extends IntentService {
 		return client;
 	}
 
+	private String getServerKey() {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		return prefs.getString("server_key", "");
+	}
+
 	private String getServerAddress() {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		return prefs.getString("server_url", "https://sms.sakay.ph");
@@ -85,6 +90,7 @@ public class RoutingService extends IntentService {
 				"&body="+Uri.encode(message)+
 				"&source="+Uri.encode(sender)
 			);
+			request.addHeader("X-API-KEY", getServerKey());
 			HttpResponse response = getHttpClient().execute(request);
 			int status = response.getStatusLine().getStatusCode();
 			String body = EntityUtils.toString(response.getEntity());

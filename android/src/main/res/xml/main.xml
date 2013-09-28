@@ -10,4 +10,8 @@
 				android:key="server_url"
 				android:title="Server Address" />
 			
+		<EditTextPreference
+				android:key="server_key"
+				android:title="Server Key" />
+
 </PreferenceScreen>
