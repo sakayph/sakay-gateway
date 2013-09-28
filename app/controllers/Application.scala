@@ -3,6 +3,7 @@ package controllers
 import java.sql.Timestamp
 
 import play.api._
+import play.api.Play.current
 import play.api.mvc._
 import play.api.libs.json._
 
@@ -63,7 +64,7 @@ object Application extends Controller with Secured {
       errors => BadRequest("incomplete"),
       { search =>
         Searches.save(search.copy(source = request.headers.get("Referer").getOrElse("web")))
-        Ok("ok")
+        corsReply
       }
     )
   }
@@ -76,5 +77,22 @@ object Application extends Controller with Secured {
       )
     }
     Ok(Json.toJson(list))
+  }
+
+  def allowedOrigin = Play.mode match {
+    case Mode.Dev => "*"
+    case _ => "http://sakay.ph"
+  }
+
+  val corsReply = Ok("ok").withHeaders(
+    "Access-Control-Allow-Origin" -> allowedOrigin
+  )
+
+  def cors = Action {
+    Ok("").withHeaders(
+      "Access-Control-Allow-Origin" -> allowedOrigin,
+      "Access-Control-Allow-Headers" -> "X-Requested-With",
+      "Access-Control-Allow-Methods" -> "GET, POST, OPTIONS"
+    )
   }
 }
