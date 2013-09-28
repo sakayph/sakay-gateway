@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html ng-app>
+<head>
+	<title>Sakay SMS Admin</title>
+	<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+	<div ng-controller="AppCtrl">
+		<div>
+			<input type="text" ng-model="secret" placeholder="Secret">
+			<button ng-click="load()">Load</button>
+		</div>
+		<table>
+			<thead>
+				<tr>
+					<th>Time</th>
+					<th>From</th>
+					<th>Message</th>
+					<th>Reply</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="message in messages">
+					<td>{{ message.message.timestamp | date: 'short' }}</td>
+					<td>{{ message.message.source }}</td>
+					<td><pre>{{ message.message.body }}</pre></td>
+					<td><pre>{{ message.reply.body }}</pre></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<script type="text/javascript" src="js/angular.min.js"></script>
+	<script type="text/javascript" src="js/sakay.js"></script>
+</body>
+</html>
