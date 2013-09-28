@@ -10,8 +10,9 @@ import models.Search
 
 object Searches {
   def save(search: Search) = DB.withConnection { implicit c =>
-    SQL("INSERT INTO searches VALUES (DEFAULT, DEFAULT, {fromName}, {fromLatitude}, {fromLongitude}, {toName}, {toLatitude}, {toLongitude})")
+    SQL("INSERT INTO searches VALUES (DEFAULT, {source}, DEFAULT, {fromName}, {fromLatitude}, {fromLongitude}, {toName}, {toLatitude}, {toLongitude})")
     .on(
+      'source -> search.source,
       'fromName -> search.fromName,
       'fromLatitude -> search.fromLatLng.map(_.lat),
       'fromLongitude -> search.fromLatLng.map(_.lng),

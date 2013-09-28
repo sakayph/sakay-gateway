@@ -2,6 +2,7 @@
 
 CREATE TABLE searches (
   id serial PRIMARY KEY,
+  source text NOT NULL,
   timestamp timestamp NOT NULL DEFAULT NOW(),
   from_name text NOT NULL,
   from_latitude real,

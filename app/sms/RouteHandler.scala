@@ -20,7 +20,7 @@ object RouteHandler extends Handler {
     } {
       val (fromName, toName) = address
       val (fromLatLng, toLatLng) = latlng
-      Searches.save(Search(fromName, fromLatLng, toName, toLatLng))
+      Searches.save(Search("sms", fromName, fromLatLng, toName, toLatLng))
     }
 
     val reply = response

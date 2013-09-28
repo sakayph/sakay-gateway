@@ -51,7 +51,7 @@ object Application extends Controller with Secured {
       "toLng" -> bigDecimal
     ) {
       case (fromName, fromLat, fromLng, toName, toLat, toLng) =>
-        Search(fromName, Some(LatLng(fromLat.doubleValue, fromLng.doubleValue)), toName, Some(LatLng(toLat.doubleValue, toLng.doubleValue)))
+        Search("web", fromName, Some(LatLng(fromLat.doubleValue, fromLng.doubleValue)), toName, Some(LatLng(toLat.doubleValue, toLng.doubleValue)))
     }
     {
       case _ => None
@@ -61,8 +61,8 @@ object Application extends Controller with Secured {
   def log = Action { implicit request =>
     logForm.bindFromRequest.fold(
       errors => BadRequest("incomplete"),
-      { request =>
-        Searches.save(request)
+      { search =>
+        Searches.save(search.copy(source = request.headers.get("Referer").getOrElse("web")))
         Ok("ok")
       }
     )
