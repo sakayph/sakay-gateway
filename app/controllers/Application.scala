@@ -12,7 +12,7 @@ import play.api.data.Forms._
 
 import sms._
 import models._
-import database.{Messages,Searches}
+import database.{Messages,Searches,Pending}
 
 object Application extends Controller with Secured {
 
@@ -77,6 +77,24 @@ object Application extends Controller with Secured {
       )
     }
     Ok(Json.toJson(list))
+  }
+
+  val sendForm = Form(
+    tuple(
+      "target" -> text,
+      "itinerary" -> text
+    )
+  )
+
+  def send = Action { implicit request =>
+    sendForm.bindFromRequest.fold(
+      errors => BadRequest("incomplete"),
+      { case (target, itinerary) =>
+        val message = RouteHandler.formatItinerary(Json.parse(itinerary))
+        Pending.save(target, message)
+        corsReply
+      }
+    )
   }
 
   def allowedOrigin = Play.mode match {
