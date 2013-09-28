@@ -86,9 +86,16 @@ public class RoutingService extends IntentService {
 				"&source="+Uri.encode(sender)
 			);
 			HttpResponse response = getHttpClient().execute(request);
-			String str = EntityUtils.toString(response.getEntity());
-			Log.d("RoutingService", "Got server response: "+str);
-			return str;
+			int status = response.getStatusLine().getStatusCode();
+			String body = EntityUtils.toString(response.getEntity());
+			if(status >= 200 && status < 300) {
+				Log.d("RoutingService", "Got server response: "+body);
+				return body;
+			}
+			else {
+				Log.e("RoutingService", "Error while querying server. Got status: "+status+" and response: "+body);
+				return "Sorry, there is a problem with the server.";
+			}
 		}
 		catch (Exception e) {
 			Log.d("RoutingService", "Error while querying server.", e);
