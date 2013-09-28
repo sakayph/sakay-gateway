@@ -4,6 +4,7 @@
 
 
 GET     /sms                        controllers.Application.sms
+GET     /poll                       controllers.Application.poll
 
 OPTIONS /api/log                    controllers.Application.cors
 OPTIONS /api/send                   controllers.Application.cors

@@ -97,6 +97,10 @@ object Application extends Controller with Secured {
     )
   }
 
+  def poll = Action {
+    Ok(Json.toJson(Pending.list()))
+  }
+
   def allowedOrigin = Play.mode match {
     case Mode.Dev => "*"
     case _ => "http://sakay.ph"
