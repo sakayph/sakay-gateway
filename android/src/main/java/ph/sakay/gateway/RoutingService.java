@@ -6,28 +6,21 @@ import android.app.IntentService;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
-import android.preference.PreferenceManager;
 import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
 public class RoutingService extends IntentService {
 
+	private APIClient mClient;
+
 	public RoutingService() {
 		super("RoutingService");
+		mClient = new APIClient(this);
 	}
 
 	@Override
@@ -49,30 +42,6 @@ public class RoutingService extends IntentService {
 		sms.sendMultipartTextMessage(sender, null, parts, sents, deliveries);
 	}
 
-	private HttpClient getHttpClient() {
-		HttpParams httpParameters = new BasicHttpParams();
-		// Set the timeout in milliseconds until a connection is established.
-		int timeoutConnection = 5000;
-		HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
-		// Set the default socket timeout (SO_TIMEOUT)
-		// in milliseconds which is the timeout for waiting for data.
-		int timeoutSocket = 300000;
-		HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
-		DefaultHttpClient client = new DefaultHttpClient(httpParameters);
-		client.setHttpRequestRetryHandler(new DefaultHttpRequestRetryHandler(1, false));
-		return client;
-	}
-
-	private String getServerKey() {
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		return prefs.getString("server_key", "");
-	}
-
-	private String getServerAddress() {
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		return prefs.getString("server_url", "https://sms.sakay.ph");
-	}
-
 	private String getOwnNumber() {
 		TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
 		String number = tm.getLine1Number();
@@ -84,14 +53,11 @@ public class RoutingService extends IntentService {
 		sender = Util.hash(sender);
 		try {
 			Log.d("RoutingService", "Querying server");
-			HttpGet request = new HttpGet(
-				getServerAddress()+"/sms"+
+			HttpResponse response = mClient.get("/sms",
 				"?target="+Uri.encode(getOwnNumber())+
 				"&body="+Uri.encode(message)+
 				"&source="+Uri.encode(sender)
 			);
-			request.addHeader("X-API-KEY", getServerKey());
-			HttpResponse response = getHttpClient().execute(request);
 			int status = response.getStatusLine().getStatusCode();
 			String body = EntityUtils.toString(response.getEntity());
 			if(status >= 200 && status < 300) {
