@@ -3,7 +3,9 @@ package ph.sakay.gateway;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.telephony.SmsMessage;
 import android.util.Log;
 
@@ -11,6 +13,11 @@ public class SmsReceiver extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		if(!prefs.getBoolean("enabled", true)) {
+			return;
+		}
+
 		Bundle b = intent.getExtras();
 		SmsMessage[] msgs = null;
 		String body = new String();
