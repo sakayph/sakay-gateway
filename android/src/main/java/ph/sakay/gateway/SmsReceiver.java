@@ -34,6 +34,12 @@ public class SmsReceiver extends BroadcastReceiver {
 
 			Log.d("SmsReceiver", "Got message: "+body+", from: "+sender);
 
+			sender = Util.normalizeNumber(sender);
+			if(!Util.isValidNumber(sender)) {
+				Log.d("SmsReceiver", "Ignoring "+sender+" because number is not valid");
+				return;
+			}
+
 			Intent i = new Intent(context, RoutingService.class);
 			i.putExtra("sender", sender);
 			i.putExtra("body", body);
