@@ -1,7 +1,11 @@
 package ph.sakay.gateway;
 
+import java.util.ArrayList;
 import java.util.regex.Pattern;
 import java.security.MessageDigest;
+
+import android.app.PendingIntent;
+import android.telephony.SmsManager;
 import android.util.Base64;
 
 public class Util {
@@ -28,5 +32,17 @@ public class Util {
 		catch (Exception e) {
 			return "hashfailure";
 		}
+	}
+
+	public static void sendSms(String target, String body) {
+		SmsManager sms = SmsManager.getDefault();
+		ArrayList<String> parts = sms.divideMessage(body);
+		ArrayList<PendingIntent> sents = new ArrayList<PendingIntent>(parts.size());
+		ArrayList<PendingIntent> deliveries = new ArrayList<PendingIntent>(parts.size());
+		for(int i = 0; i < parts.size(); ++i) {
+			sents.add(null);
+			deliveries.add(null);
+		}
+		sms.sendMultipartTextMessage(target, null, parts, sents, deliveries);
 	}
 }

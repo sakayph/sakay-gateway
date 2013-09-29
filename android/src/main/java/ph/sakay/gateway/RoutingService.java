@@ -30,16 +30,7 @@ public class RoutingService extends IntentService {
 		String body = intent.getStringExtra("body");
 
 		String reply = request(sender, body);
-
-		SmsManager sms = SmsManager.getDefault();
-		ArrayList<String> parts = sms.divideMessage(reply);
-		ArrayList<PendingIntent> sents = new ArrayList<PendingIntent>(parts.size());
-		ArrayList<PendingIntent> deliveries = new ArrayList<PendingIntent>(parts.size());
-		for(int i = 0; i < parts.size(); ++i) {
-			sents.add(null);
-			deliveries.add(null);
-		}
-		sms.sendMultipartTextMessage(sender, null, parts, sents, deliveries);
+		Util.sendSms(sender, reply);
 	}
 
 	private String getOwnNumber() {
