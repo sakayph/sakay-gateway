@@ -16,11 +16,8 @@ import org.apache.http.util.EntityUtils;
 
 public class RoutingService extends IntentService {
 
-	private APIClient mClient;
-
 	public RoutingService() {
 		super("RoutingService");
-		mClient = new APIClient(this);
 	}
 
 	@Override
@@ -44,7 +41,7 @@ public class RoutingService extends IntentService {
 		sender = Util.hash(sender);
 		try {
 			Log.d("RoutingService", "Querying server");
-			HttpResponse response = mClient.get("/sms",
+			HttpResponse response = new APIClient(this).get("/sms",
 				"?target="+Uri.encode(getOwnNumber())+
 				"&body="+Uri.encode(message)+
 				"&source="+Uri.encode(sender)
