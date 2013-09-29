@@ -23,10 +23,12 @@ object Pending {
       str("message") map(flatten)
     )
 
-    val maxId = toSend.map(_._1).max
-    SQL("DELETE FROM pending WHERE id <= ?")
+    if(toSend.size > 0) {
+      val maxId = toSend.map(_._1).max
+      SQL("DELETE FROM pending WHERE id <= {id}")
       .on('id -> maxId)
       .executeUpdate()
+    }
 
     toSend.map { case (_, target, message) =>
       Json.obj(
