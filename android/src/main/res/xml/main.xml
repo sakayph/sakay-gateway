@@ -6,6 +6,11 @@
 				android:title="Enable Routing"
 				android:defaultValue="true" />
 
+		<CheckBoxPreference
+				android:key="polling_enabled"
+				android:title="Enable Polling"
+				android:defaultValue="true" />
+
 		<EditTextPreference
 				android:key="server_url"
 				android:title="Server Address" />
