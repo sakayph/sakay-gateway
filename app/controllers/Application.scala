@@ -97,7 +97,7 @@ object Application extends Controller with Secured {
     )
   }
 
-  def poll = SecureAction {
+  def poll = SecureAction { request =>
     Ok(Json.toJson(Pending.list()))
   }
 
