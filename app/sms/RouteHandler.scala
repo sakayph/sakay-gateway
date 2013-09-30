@@ -2,7 +2,7 @@ package sms
 
 import play.api.libs.json._
 import ws.{OpenTripPlanner,Google}
-import models.{LatLng,Search}
+import models.{LatLng,Search,BusFare,RailFare}
 import database.Searches
 
 object RouteHandler extends Handler {
@@ -52,12 +52,21 @@ object RouteHandler extends Handler {
 
   def formatItinerary(itinerary: JsValue) = {
     val legs = (itinerary \ "legs").asInstanceOf[JsArray].value
-    legs.zipWithIndex
+    val totalCost = legs.map(getFare).sum
+    val output = legs.zipWithIndex
       .filter {
         case (leg, 0) => true
         case (leg, n) => leg.\("duration").as[Double] > 60000
       }
       .map(formatLeg).reduceLeft(_+"\n"+_)
+
+    val fare = if(totalCost > 0) {
+      "\nFare: %.2f".format(totalCost)
+    }
+    else {
+      ""
+    }
+    output + fare
   }
 
   def formatLeg(tuple: (JsValue, Int)) = {
@@ -73,6 +82,25 @@ object RouteHandler extends Handler {
       "ride "+route+" to "+to
     }
     (index+1)+". "+direction
+  }
+
+  def getFare(leg: JsValue) = {
+    def getStop(on: String) = leg.\(on).\("stopId").\("id").as[String]
+    val mode = leg.\("mode").as[String]
+    if(mode == "BUS" || mode == "RAIL") {
+      val routeId = leg.\("routeId").as[String]
+
+      mode match {
+        case "BUS" =>
+          val typ = if(routeId.contains("PUJ")) "puj" else "pub_aircon"
+          BusFare.get(typ, leg.\("distance").as[Double]).regular
+        case "RAIL" =>
+          RailFare.get(routeId, getStop("from"), getStop("to")).regular
+      }
+    }
+    else {
+      0
+    }
   }
 
   // hacky solution ATM
