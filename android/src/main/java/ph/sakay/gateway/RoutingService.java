@@ -38,7 +38,6 @@ public class RoutingService extends IntentService {
 	}
 
 	private String request(String sender, String message) {
-		sender = Util.hash(sender);
 		try {
 			Log.d("RoutingService", "Querying server");
 			HttpResponse response = new APIClient(this).get("/sms",
