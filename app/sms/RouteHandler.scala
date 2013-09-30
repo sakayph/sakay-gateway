@@ -53,20 +53,24 @@ object RouteHandler extends Handler {
   def formatItinerary(itinerary: JsValue) = {
     val legs = (itinerary \ "legs").asInstanceOf[JsArray].value
     val totalCost = legs.map(getFare).sum
-    val output = legs.zipWithIndex
+    var output = legs.zipWithIndex
       .filter {
         case (leg, 0) => true
         case (leg, n) => leg.\("duration").as[Double] > 60000
       }
       .map(formatLeg).reduceLeft(_+"\n"+_)
 
-    val fare = if(totalCost > 0) {
-      "\nFare: %.2f".format(totalCost)
+    val incomplete = legs.count { leg =>
+      leg.\("mode").as[String] == "RAIL" && leg.\("routeId").as[String] == "ROUTE_880872"
+    } > 0
+
+    if(totalCost > 0) {
+      output += "\nFare: %.2f".format(totalCost)
     }
-    else {
-      ""
+    if(totalCost > 0 && incomplete) {
+      output += "*"
     }
-    output + fare
+    output
   }
 
   def formatLeg(tuple: (JsValue, Int)) = {
