@@ -10,7 +10,6 @@ OPTIONS /api/log                    controllers.Application.cors
 OPTIONS /api/send                   controllers.Application.cors
 POST    /api/log                    controllers.Application.log
 POST    /api/send                   controllers.Application.send
-GET     /api/list                   controllers.Application.list(since: Option[Long])
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /*file                      controllers.Assets.at(path="/public", file)
+# GET     /*file                      controllers.Assets.at(path="/public", file)

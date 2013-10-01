@@ -73,16 +73,6 @@ object Application extends Controller with Secured {
     )
   }
 
-  def list(since: Option[Long]) = SecureAction { implicit request =>
-    val list = Messages.list(since.getOrElse(System.currentTimeMillis)).map {
-      case (message, reply) => Json.obj(
-        "message" -> message,
-        "reply" -> reply
-      )
-    }
-    Ok(Json.toJson(list))
-  }
-
   val sendForm = Form(
     tuple(
       "target" -> text,
