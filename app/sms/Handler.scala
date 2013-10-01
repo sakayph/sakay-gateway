@@ -25,4 +25,5 @@ object Handler {
   register(NearHandler)
   register(AboutHandler)
   register(HelpHandler)
+  register(ReportHandler)
 }
