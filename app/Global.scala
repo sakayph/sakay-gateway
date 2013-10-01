@@ -8,6 +8,6 @@ import play.api.mvc.Results._
 
 object Global extends GlobalSettings {
   override def onHandlerNotFound(request: RequestHeader) = {
-    NotFound("404")
+    Redirect("http://sakay.ph")
   }
 }
