@@ -12,29 +12,26 @@ import database.Searches
 object RouteHandler extends Handler {
   def keyword = "ROUTE"
   def process(message: SmsMessage) = {
-    val parsedMessage = parseMessage(message.body)
-    val response = parsedMessage match {
+    val response = parseMessage(message.body) match {
       case None => Left("Incorrect format. Message should be ROUTE <start> TO <end>")
-      case Some((from, to)) => Right((Google.geocode(from), Google.geocode(to)))
+      case Some((from, to)) => Right((from, Google.geocode(from), to, Google.geocode(to)))
     }
 
-    for {
-      address <- parsedMessage
-      latlng <- response.right.toOption
-    } {
-      val (fromName, toName) = address
-      val (fromLatLng, toLatLng) = latlng
+    response.right.foreach { case (fromName, fromLatLng, toName, toLatLng) =>
       Searches.save(Search("sms", fromName, fromLatLng, toName, toLatLng))
     }
 
+
     val reply = response
     .right.flatMap {
-      case (Some(from), Some(to)) => Right(OpenTripPlanner.plan(from, to))
-      case _ => Left("Could not find a location. Try again with a different spelling.")
+      case (_, Some(from), _, Some(to)) => Right(OpenTripPlanner.plan(from, to))
+      case (from, None, _, Some(to)) => Left("Sorry, we could not find "+from+". Can you be more specific?")
+      case (_, Some(from), to, None) => Left("Sorry, we could not find "+to+". Can you be more specific?")
+      case (_, None, _, None) => Left("Sorry, we could not find either location. Can you be more specific?")
     }
     .right.flatMap {
       case Some(response) => Right(formatItinerary((response.json \ "plan" \ "itineraries")(0)))
-      case None => Left("Could not find a route.")
+      case None => Left("Sorry, we could not find a route.")
     }
     .merge
 
