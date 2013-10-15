@@ -30,7 +30,13 @@ object RouteHandler extends Handler {
       case (_, None, _, None) => Left("Sorry, we could not find either location. Can you be more specific?")
     }
     .right.flatMap {
-      case Some(response) => Right(formatItinerary((response.json \ "plan" \ "itineraries")(0)))
+      case Some(response) =>
+        if((response.json \ "plan") == JsNull) {
+          Left("Sorry, we could not find a route.")
+        }
+        else {
+          Right(formatItinerary((response.json \ "plan" \ "itineraries")(0)))
+        }
       case None => Left("Sorry, we could not find a route.")
     }
     .merge
