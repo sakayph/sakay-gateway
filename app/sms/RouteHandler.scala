@@ -98,10 +98,12 @@ object RouteHandler extends Handler {
   def getFare(leg: JsValue) = {
     def getStop(on: String) = leg.\(on).\("stopId").\("id").as[String]
     val mode = leg.\("mode").as[String]
-    if(mode == "BUS" || mode == "RAIL") {
+    if(mode == "JEEP" || mode == "BUS" || mode == "RAIL") {
       val routeId = leg.\("routeId").as[String]
 
       mode match {
+        case "JEEP" =>
+          BusFare.get("puj", leg.\("distance").as[Double]).regular
         case "BUS" =>
           val typ = if(routeId.contains("PUJ")) "puj" else "pub_aircon"
           BusFare.get(typ, leg.\("distance").as[Double]).regular
