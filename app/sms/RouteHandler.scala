@@ -35,7 +35,10 @@ object RouteHandler extends Handler {
           Left("Sorry, we could not find a route.")
         }
         else {
-          Right(formatItinerary((response.json \ "plan" \ "itineraries")(0)))
+          formatItinerary((response.json \ "plan" \ "itineraries")(0)) match {
+            case Some(formatted) => Right(formatted)
+            case None => Left("Sorry, something wrong happened.")
+          }
         }
       case None => Left("Sorry, we could not find a route.")
     }
@@ -58,26 +61,31 @@ object RouteHandler extends Handler {
   }
 
   def formatItinerary(itinerary: JsValue) = {
-    val legs = (itinerary \ "legs").asInstanceOf[JsArray].value
-    val totalCost = legs.map(getFare).sum
-    var output = legs.zipWithIndex
-      .filter {
-        case (leg, 0) => true
-        case (leg, n) => leg.\("duration").as[Double] > 60000
+    (itinerary \ "legs") match {
+      case JsArray(legs) if !legs.isEmpty => {
+        val totalCost = legs.map(getFare).sum
+        var output = legs.zipWithIndex
+          .filter {
+            case (leg, 0) => true
+            case (leg, n) => leg.\("duration").as[Double] > 60000
+          }
+          .map(formatLeg).reduceLeft(_+"\n"+_)
+
+        val incomplete = legs.count { leg =>
+          leg.\("mode").as[String] == "RAIL" && leg.\("routeId").as[String] == "ROUTE_880872"
+        } > 0
+
+        if(totalCost > 0) {
+          output += "\nFare: %.2f".format(totalCost)
+        }
+        if(totalCost > 0 && incomplete) {
+          output += "*"
+        }
+        Some(output)
       }
-      .map(formatLeg).reduceLeft(_+"\n"+_)
 
-    val incomplete = legs.count { leg =>
-      leg.\("mode").as[String] == "RAIL" && leg.\("routeId").as[String] == "ROUTE_880872"
-    } > 0
-
-    if(totalCost > 0) {
-      output += "\nFare: %.2f".format(totalCost)
+      case _=> None
     }
-    if(totalCost > 0 && incomplete) {
-      output += "*"
-    }
-    output
   }
 
   def formatLeg(tuple: (JsValue, Int)) = {

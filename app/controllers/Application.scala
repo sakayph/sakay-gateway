@@ -65,10 +65,10 @@ object Application extends Controller with Secured {
 
   def log = Action { implicit request =>
     logForm.bindFromRequest.fold(
-      errors => BadRequest("incomplete"),
+      errors => withCors(BadRequest("incomplete")),
       { search =>
         Searches.save(search.copy(source = request.headers.get("Referer").getOrElse("web")))
-        corsReply
+        withCors(Ok("ok"))
       }
     )
   }
@@ -82,11 +82,16 @@ object Application extends Controller with Secured {
 
   def send = Action { implicit request =>
     sendForm.bindFromRequest.fold(
-      errors => BadRequest("incomplete"),
+      errors => withCors(BadRequest("incomplete")),
       { case (target, itinerary) =>
-        val message = RouteHandler.formatItinerary(Json.parse(itinerary))
-        Pending.save(target, message)
-        corsReply
+        RouteHandler.formatItinerary(Json.parse(itinerary)) match {
+          case Some(message) =>
+            Pending.save(target, message)
+            withCors(Ok("ok"))
+
+          case None =>
+            withCors(BadRequest("empty"))
+        }
       }
     )
   }
@@ -100,7 +105,7 @@ object Application extends Controller with Secured {
     case _ => "http://sakay.ph"
   }
 
-  val corsReply = Ok("ok").withHeaders(
+  def withCors(result: Result) = result.withHeaders(
     "Access-Control-Allow-Origin" -> allowedOrigin
   )
 
