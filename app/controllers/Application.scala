@@ -63,7 +63,7 @@ object Application extends Controller with Secured {
     }
   )
 
-  def log = Action { implicit request =>
+  def log = Action(parse.tolerantFormUrlEncoded) { implicit request =>
     logForm.bindFromRequest.fold(
       errors => withCors(BadRequest("incomplete")),
       { search =>
@@ -80,7 +80,7 @@ object Application extends Controller with Secured {
     )
   )
 
-  def send = Action { implicit request =>
+  def send = Action(parse.tolerantFormUrlEncoded) { implicit request =>
     sendForm.bindFromRequest.fold(
       errors => withCors(BadRequest("incomplete")),
       { case (target, itinerary) =>
